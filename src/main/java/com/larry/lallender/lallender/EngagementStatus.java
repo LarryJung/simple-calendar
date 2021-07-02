@@ -1,5 +1,6 @@
 package com.larry.lallender.lallender;
 
-public enum YnType {
-    Y,N
+public enum EngagementStatus {
+    REQUESTED, ACCEPTED
+
 }
