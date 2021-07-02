@@ -1,20 +1,16 @@
-package com.larry.lallender.lallender.domain.entity;
+package com.larry.lallender.lallender.dto;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
-public class Event {
-    private final Long scheduleId;
+public class EventCreateReq {
     private final LocalDateTime startAt;
     private final LocalDateTime endAt;
     private final LocalDateTime createdAt;
     private final String title;
     private final String description;
-    private final User writer;
-
-    public boolean isOverlapped(LocalDateTime startAt, LocalDateTime endAt) {
-        return false;
-    }
+    private final List<Long> attendeeIds;
 }

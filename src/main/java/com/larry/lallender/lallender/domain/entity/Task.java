@@ -1,27 +1,15 @@
 package com.larry.lallender.lallender.domain.entity;
 
-import lombok.Getter;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Getter
+@Data
 public class Task {
-    private Long id;
-    private LocalDateTime taskAt;
-    private String title;
-    private String description;
-    private User writer;
-    private LocalDateTime createdAt;
-
-    public Task(final Long id,
-                final LocalDateTime taskAt,
-                final String title,
-                final String description,
-                final User writer) {
-        this.id = id;
-        this.taskAt = taskAt;
-        this.title = title;
-        this.description = description;
-        this.writer = writer;
-    }
+    private final Long scheduleId;
+    private final User writer;
+    private final String title;
+    private final String description;
+    private final LocalDateTime taskAt;
+    private final LocalDateTime createdAt;
 }

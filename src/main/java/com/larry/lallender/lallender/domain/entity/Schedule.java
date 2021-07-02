@@ -18,37 +18,52 @@ public class Schedule {
     private ScheduleType scheduleType;
     private LocalDateTime createdAt;
 
+    public static Schedule ofEvent(Event event) {
+        return ofEvent(event.getStartAt(), event.getEndAt(), event.getTitle(), event.getDescription(), event.getWriter());
+    }
     public static Schedule ofEvent(LocalDateTime startAt, LocalDateTime endAt, String title,
                                    String description, User writer) {
         return Schedule.builder()
-                .startAt(startAt)
-                .endAt(endAt)
-                .title(title)
-                .description(description)
-                .writer(writer)
-                .scheduleType(ScheduleType.EVENT)
-                .createdAt(LocalDateTime.now())
-                .build();
+                       .startAt(startAt)
+                       .endAt(endAt)
+                       .title(title)
+                       .description(description)
+                       .writer(writer)
+                       .scheduleType(ScheduleType.EVENT)
+                       .createdAt(LocalDateTime.now())
+                       .build();
     }
 
-    public static Schedule ofTask(LocalDateTime taskAt, String title, String description, User writer) {
+    public static Schedule ofTask(String title, String description, LocalDateTime taskAt, User writer) {
         return Schedule.builder()
-                .startAt(taskAt)
-                .title(title)
-                .description(description)
-                .writer(writer)
-                .scheduleType(ScheduleType.EVENT)
-                .createdAt(LocalDateTime.now())
-                .build();
+                       .startAt(taskAt)
+                       .title(title)
+                       .description(description)
+                       .writer(writer)
+                       .scheduleType(ScheduleType.EVENT)
+                       .createdAt(LocalDateTime.now())
+                       .build();
     }
 
     public static Schedule ofNotification(LocalDateTime notifyAt, String title, User writer) {
         return Schedule.builder()
-                .startAt(notifyAt)
-                .title(title)
-                .writer(writer)
-                .scheduleType(ScheduleType.EVENT)
-                .createdAt(LocalDateTime.now())
-                .build();
+                       .startAt(notifyAt)
+                       .title(title)
+                       .writer(writer)
+                       .scheduleType(ScheduleType.EVENT)
+                       .createdAt(LocalDateTime.now())
+                       .build();
+    }
+
+    public Task toTask() {
+        return new Task(id, writer, title, description, startAt, createdAt);
+    }
+
+    public Event toEvent() {
+        return new Event(id, startAt, endAt, createdAt, title, description, writer);
+    }
+
+    public Notification toNotification() {
+        return new Notification(id, writer, title, startAt);
     }
 }
