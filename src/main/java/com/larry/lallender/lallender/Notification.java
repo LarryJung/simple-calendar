@@ -1,7 +1,12 @@
 package com.larry.lallender.lallender;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.time.LocalDateTime;
 
+@RequiredArgsConstructor
+@Getter
 public class Notification {
     private Long id;
     private User writer;
