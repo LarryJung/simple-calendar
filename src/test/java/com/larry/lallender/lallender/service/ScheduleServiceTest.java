@@ -4,7 +4,9 @@ import com.larry.lallender.lallender.domain.entity.*;
 import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.domain.repository.ScheduleRepository;
 import com.larry.lallender.lallender.dto.EventCreateReq;
+import com.larry.lallender.lallender.dto.NotificationCreateReq;
 import com.larry.lallender.lallender.dto.TaskCreateReq;
+import com.larry.lallender.lallender.util.TimeUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -150,7 +152,8 @@ public class ScheduleServiceTest {
                                               .toEvent(),
                                       User.builder()
                                           .id(2L)
-                                          .build()).accept(),
+                                          .build())
+                                  .accept(),
                         Engagement.of(Schedule.ofEvent(time2.plusMinutes(5),
                                                        time2.plusMinutes(10),
                                                        null,
@@ -180,4 +183,43 @@ public class ScheduleServiceTest {
         assertEquals("cannot create event - time overlap", ex.getMessage());
     }
 
+    @Test
+    @DisplayName("알림 생성한다. - 반복 없음")
+    void test5() {
+        final User writer = user1;
+        when(scheduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        final List<Notification> notifications = scheduleService.createNotification(writer,
+                                                                                    new NotificationCreateReq(
+                                                                                            "스프링 공부",
+                                                                                            time1,
+                                                                                            null));
+        assertEquals(1, notifications.size());
+        assertEquals(time1,
+                     notifications.get(0)
+                                  .getNotifyAt());
+    }
+
+    @Test
+    @DisplayName("알림 생성한다. - 일 반복")
+    void test6() {
+        final User writer = user1;
+        when(scheduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        final List<Notification> notifications = scheduleService.createNotification(writer,
+                                                                                    new NotificationCreateReq(
+                                                                                            "스프링 공부",
+                                                                                            time1,
+                                                                                            new NotificationCreateReq.RepeatInfo(
+                                                                                                    new NotificationCreateReq.RepeatPeriod(
+                                                                                                            1,
+                                                                                                            TimeUnit.DAY),
+                                                                                                    3,
+                                                                                                    null,
+                                                                                                    null
+                                                                                            )));
+        assertEquals(3, notifications.size());
+        assertEquals(List.of(time1, time1.plusDays(1), time1.plusDays(2)),
+                     notifications.stream()
+                                  .map(Notification::getNotifyAt)
+                                  .sorted());
+    }
 }

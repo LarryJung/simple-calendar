@@ -31,7 +31,7 @@ public class ScheduleService {
     public EventWithEngagement createEvent(User writer, EventCreateReq req) {
         final List<Engagement> engagementList =
                 engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtBefore(req.getAttendeeIds(),
-                                                                                 req.getStartAt());
+                                                                                  req.getStartAt());
         if (engagementList
                 .stream()
                 .anyMatch(e -> e.getEvent()
@@ -55,13 +55,13 @@ public class ScheduleService {
         return new EventWithEngagement(newEvent, engagements);
     }
 
-    public Notification createNotification(User writer, NotificationCreateReq req) {
+    public List<Notification> createNotification(User writer, NotificationCreateReq req) {
         return req.getFlattenedTimes()
                   .stream()
-                  .map(notifyAt -> Schedule.ofNotification(notifyAt, req.getTitle(), writer))
-                  .map(n -> scheduleRepository.save(n))
-                  .findFirst()
-                  .map(s -> s.toNotification())
-                  .orElseThrow(() -> new RuntimeException("no notification"));
+                  .map(notifyAt -> scheduleRepository.save(Schedule.ofNotification(notifyAt,
+                                                                                   req.getTitle(),
+                                                                                   writer))
+                                                     .toNotification())
+                  .collect(toList());
     }
 }

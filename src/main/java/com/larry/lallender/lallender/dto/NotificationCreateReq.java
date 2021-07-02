@@ -22,6 +22,9 @@ public class NotificationCreateReq {
     }
 
     public List<LocalDateTime> getFlattenedTimes() {
+        if (repeatInfo == null) {
+            return Collections.singletonList(notifyAt);
+        }
         return Collections.emptyList();
     }
 
@@ -34,7 +37,7 @@ public class NotificationCreateReq {
     }
 
     @Data
-    static class RepeatPeriod {
+    public static class RepeatPeriod {
         private final int quantity;
         private final TimeUnit timeUnit;
     }
