@@ -2,6 +2,7 @@ package com.larry.lallender.lallender.service;
 
 import com.larry.lallender.lallender.domain.entity.User;
 import com.larry.lallender.lallender.dto.UserCreateReq;
+import com.larry.lallender.lallender.dto.UserSignInReq;
 import com.larry.lallender.lallender.dto.UserSignUpReq;
 import com.larry.lallender.lallender.util.BCryptEncryptor;
 import com.larry.lallender.lallender.util.Encryptor;
@@ -9,7 +10,7 @@ import com.larry.lallender.lallender.util.Encryptor;
 import javax.servlet.http.HttpSession;
 
 public class LoginService {
-    private final String LOGIN_SESSION_KEY = "USER_ID";
+    public final static String LOGIN_SESSION_KEY = "USER_ID";
     private final UserService userService;
     private final Encryptor encryptor = new BCryptEncryptor();
 
@@ -26,7 +27,7 @@ public class LoginService {
                              newUser.getId());
     }
 
-    public void signIn(UserSignUpReq req, HttpSession session) {
+    public void signIn(UserSignInReq req, HttpSession session) {
         Long userId = (Long) session.getAttribute(LOGIN_SESSION_KEY);
         if (userId != null) {
             return;
@@ -39,6 +40,10 @@ public class LoginService {
         } else {
             throw new RuntimeException("password not match");
         }
+    }
+
+    public void signOut(HttpSession session) {
+        session.removeAttribute(LOGIN_SESSION_KEY);
     }
 
 }

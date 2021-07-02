@@ -1,15 +1,13 @@
 package com.larry.lallender.lallender.domain.entity;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Builder(access = AccessLevel.PRIVATE)
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Schedule {
     private Long id;
     private LocalDateTime startAt;
