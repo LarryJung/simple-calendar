@@ -15,6 +15,6 @@ public class Event {
     private final User writer;
 
     public boolean isOverlapped(LocalDateTime startAt, LocalDateTime endAt) {
-        return false;
+        return !(this.endAt.isBefore(startAt) || this.startAt.isAfter(endAt));
     }
 }

@@ -11,47 +11,48 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final EngagementRepository engagementRepository;
+    private final UserService userService;
 
-    public Task createTask(User writer,
-                           TaskCreateReq req) {
-        Schedule schedule = scheduleRepository.save(Schedule.ofTask(req.getTitle(),
-                                                                    req.getDescription(),
-                                                                    req.getTaskAt(),
-                                                                    writer));
+    public Task createTask(User writer, TaskCreateReq req) {
+        final Schedule schedule = scheduleRepository.save(Schedule.ofTask(req.getTitle(),
+                                                                          req.getDescription(),
+                                                                          req.getTaskAt(),
+                                                                          writer));
         return schedule.toTask();
     }
 
-    public Event createEvent(User writer, EventCreateReq req) {
-        List<Engagement> engagementList =
-                engagementRepository.findAllByAttendeeIdIn(req.getAttendeeIds());
+    public EventWithEngagement createEvent(User writer, EventCreateReq req) {
+        final List<Engagement> engagementList =
+                engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtBefore(req.getAttendeeIds(),
+                                                                                 req.getStartAt());
         if (engagementList
                 .stream()
-                .noneMatch(e -> e.getEvent()
-                                 .isOverlapped(req.getStartAt(), req.getEndAt())
+                .anyMatch(e -> e.getEvent()
+                                .isOverlapped(req.getStartAt(), req.getEndAt())
                         && e.getStatus() == EngagementStatus.ACCEPTED)) {
-            Event newEvent = scheduleRepository.save(Schedule.ofEvent(req.getStartAt(),
-                                                                      req.getEndAt(),
-                                                                      req.getTitle(),
-                                                                      req.getDescription(),
-                                                                      writer))
-                                               .toEvent();
-            engagementList.stream()
-                          .map(Engagement::getAttendee)
-                          .collect(toSet())
-                          .stream()
-                          .map(a -> Engagement.of(newEvent, writer))
-                          .forEach(engagementRepository::save);
-            return newEvent;
-        } else {
-            throw new RuntimeException("cannot create event");
+            throw new RuntimeException("cannot create event - time overlap");
         }
+        final Event newEvent = scheduleRepository.save(Schedule.ofEvent(req.getStartAt(),
+                                                                        req.getEndAt(),
+                                                                        req.getTitle(),
+                                                                        req.getDescription(),
+                                                                        writer))
+                                                 .toEvent();
+        final List<Engagement> engagements = req.getAttendeeIds()
+                                                .stream()
+                                                .map(a -> engagementRepository.save(
+                                                        Engagement.of(newEvent,
+                                                                      userService.findById(a)))
+                                                )
+                                                .collect(toList());
+        return new EventWithEngagement(newEvent, engagements);
     }
 
     public Notification createNotification(User writer, NotificationCreateReq req) {

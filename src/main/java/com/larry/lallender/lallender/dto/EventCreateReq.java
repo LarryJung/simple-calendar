@@ -9,7 +9,6 @@ import java.util.List;
 public class EventCreateReq {
     private final LocalDateTime startAt;
     private final LocalDateTime endAt;
-    private final LocalDateTime createdAt;
     private final String title;
     private final String description;
     private final List<Long> attendeeIds;

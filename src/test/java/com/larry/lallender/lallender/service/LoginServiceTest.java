@@ -29,7 +29,7 @@ public class LoginServiceTest {
     @Test
     @DisplayName("회원가입 - 성공")
     void test1() {
-        HttpSession session = new MockHttpSession();
+        final HttpSession session = new MockHttpSession();
 
         when(userService.create(any(UserCreateReq.class)))
                 .thenReturn(User.builder().id(1L).build());
@@ -49,7 +49,7 @@ public class LoginServiceTest {
     @Test
     @DisplayName("sign in - 세션이 있을 때")
     void test2() {
-        HttpSession session = new MockHttpSession();
+        final HttpSession session = new MockHttpSession();
         session.setAttribute(LOGIN_SESSION_KEY,
                              1L);
 
@@ -64,8 +64,8 @@ public class LoginServiceTest {
     @Test
     @DisplayName("sign in = 세션이 없을때 & 비밀번호 통과")
     void test3() {
-        String password = "pw";
-        HttpSession session = new MockHttpSession();
+        final String password = "pw";
+        final HttpSession session = new MockHttpSession();
         when(userService.findByEmail(any())).thenReturn(User.builder()
                                                             .id(1L)
                                                             .password(new BCryptEncryptor().encrypt(password))
@@ -80,14 +80,14 @@ public class LoginServiceTest {
     @Test
     @DisplayName("sign in = 세션이 없을때 & 비밀번호 실패")
     void test4() {
-        String password = "pw";
-        HttpSession session = new MockHttpSession();
+        final String password = "pw";
+        final HttpSession session = new MockHttpSession();
         when(userService.findByEmail(any()))
                 .thenReturn(User.builder()
                                 .id(1L)
                                 .password("pw")
                                 .build());
-        RuntimeException ex = assertThrows(RuntimeException.class,
+        final RuntimeException ex = assertThrows(RuntimeException.class,
                                            () -> loginService.signIn(new UserSignInReq("email", password), session));
 
         assertEquals("password not match", ex.getMessage());

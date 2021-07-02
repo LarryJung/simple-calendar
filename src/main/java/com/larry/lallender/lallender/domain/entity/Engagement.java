@@ -1,12 +1,10 @@
 package com.larry.lallender.lallender.domain.entity;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Builder(access = AccessLevel.PRIVATE)
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Engagement {
     private Long id;
     private Schedule schedule;
@@ -21,6 +19,11 @@ public class Engagement {
         return schedule.toEvent();
     }
 
+    public Engagement accept() {
+        this.status = EngagementStatus.ACCEPTED;
+        return this;
+    }
+
     public static Engagement of(Event event, User attendee) {
         return Engagement.builder()
                          .schedule(Schedule.ofEvent(event))
@@ -28,4 +31,5 @@ public class Engagement {
                          .status(EngagementStatus.REQUESTED)
                          .build();
     }
+
 }
