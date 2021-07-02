@@ -1,4 +1,4 @@
-package com.larry.lallender.lallender;
+package com.larry.lallender.lallender.domain.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
