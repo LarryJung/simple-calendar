@@ -4,14 +4,17 @@ import com.larry.lallender.lallender.domain.entity.User;
 import com.larry.lallender.lallender.dto.UserCreateReq;
 import com.larry.lallender.lallender.dto.UserSignInReq;
 import com.larry.lallender.lallender.dto.UserSignUpReq;
+import com.larry.lallender.lallender.exception.CalendarException;
+import com.larry.lallender.lallender.exception.ErrorCode;
 import com.larry.lallender.lallender.util.BCryptEncryptor;
 import com.larry.lallender.lallender.util.Encryptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
+
+import static com.larry.lallender.lallender.exception.ErrorCode.PASSWORD_NOT_MATCH;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +45,7 @@ public class LoginService {
             session.setAttribute(LOGIN_SESSION_KEY,
                                  user.getId());
         } else {
-            throw new RuntimeException("password not match");
+            throw new CalendarException(PASSWORD_NOT_MATCH);
         }
     }
 
