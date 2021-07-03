@@ -6,27 +6,31 @@ import com.larry.lallender.lallender.dto.UserSignInReq;
 import com.larry.lallender.lallender.dto.UserSignUpReq;
 import com.larry.lallender.lallender.util.BCryptEncryptor;
 import com.larry.lallender.lallender.util.Encryptor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 
+@Service
+@RequiredArgsConstructor
 public class LoginService {
     public final static String LOGIN_SESSION_KEY = "USER_ID";
     private final UserService userService;
     private final Encryptor encryptor = new BCryptEncryptor();
 
-    public LoginService(UserService userService) {
-        this.userService = userService;
-    }
-
+    @Transactional
     public void signUp(UserSignUpReq req, HttpSession session) {
         User newUser = userService.create(new UserCreateReq(req.getName(),
                                                             req.getEmail(),
                                                             encryptor.encrypt(req.getPassword()),
-                                                            req.getBirthDay()));
+                                                            req.getBirthday()));
         session.setAttribute(LOGIN_SESSION_KEY,
                              newUser.getId());
     }
 
+    @Transactional
     public void signIn(UserSignInReq req, HttpSession session) {
         Long userId = (Long) session.getAttribute(LOGIN_SESSION_KEY);
         if (userId != null) {

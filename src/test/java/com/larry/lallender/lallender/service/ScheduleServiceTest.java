@@ -1,6 +1,9 @@
 package com.larry.lallender.lallender.service;
 
 import com.larry.lallender.lallender.domain.entity.*;
+import com.larry.lallender.lallender.domain.entity.dto.EventWithEngagement;
+import com.larry.lallender.lallender.domain.entity.dto.Notification;
+import com.larry.lallender.lallender.domain.entity.dto.Task;
 import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.domain.repository.ScheduleRepository;
 import com.larry.lallender.lallender.dto.EventCreateReq;

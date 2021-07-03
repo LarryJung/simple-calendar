@@ -1,5 +1,6 @@
-package com.larry.lallender.lallender.domain.entity;
+package com.larry.lallender.lallender.domain.entity.dto;
 
+import com.larry.lallender.lallender.domain.entity.Engagement;
 import lombok.Data;
 
 import java.util.List;

@@ -1,6 +1,7 @@
 package com.larry.lallender.lallender.service;
 
 import com.larry.lallender.lallender.domain.entity.*;
+import com.larry.lallender.lallender.domain.entity.dto.*;
 import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.domain.repository.ScheduleRepository;
 import com.larry.lallender.lallender.dto.EventCreateReq;
@@ -8,6 +9,7 @@ import com.larry.lallender.lallender.dto.NotificationCreateReq;
 import com.larry.lallender.lallender.dto.TaskCreateReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class ScheduleService {
         return schedule.toTask();
     }
 
+    @Transactional
     public EventWithEngagement createEvent(User writer, EventCreateReq req) {
         final List<Engagement> engagementList =
                 engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtBefore(req.getAttendeeIds(),
@@ -55,6 +58,7 @@ public class ScheduleService {
         return new EventWithEngagement(newEvent, engagements);
     }
 
+    @Transactional
     public List<Notification> createNotification(User writer, NotificationCreateReq req) {
         return req.getFlattenedTimes()
                   .stream()

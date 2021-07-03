@@ -1,6 +1,6 @@
 package com.larry.lallender.lallender.domain;
 
-import com.larry.lallender.lallender.domain.entity.Event;
+import com.larry.lallender.lallender.domain.entity.dto.Event;
 import com.larry.lallender.lallender.domain.entity.Schedule;
 import com.larry.lallender.lallender.domain.entity.User;
 import org.junit.jupiter.api.DisplayName;
