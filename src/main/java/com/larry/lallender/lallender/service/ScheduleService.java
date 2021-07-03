@@ -6,6 +6,7 @@ import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.domain.repository.ScheduleRepository;
 import com.larry.lallender.lallender.dto.EventCreateReq;
 import com.larry.lallender.lallender.dto.NotificationCreateReq;
+import com.larry.lallender.lallender.dto.SimpleScheduleDto;
 import com.larry.lallender.lallender.dto.TaskCreateReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -67,5 +68,39 @@ public class ScheduleService {
                                                                                    writer))
                                                      .toNotification())
                   .collect(toList());
+    }
+
+    @Transactional
+    public List<SimpleScheduleDto> getSchedules(Long userId) {
+        return scheduleRepository.findAllByWriter_Id(userId)
+                                 .stream()
+                                 .map(s -> {
+                                     SimpleScheduleDto.SimpleScheduleDtoBuilder builder =
+                                             SimpleScheduleDto.builder()
+                                                              .id(s.getId())
+                                                              .scheduleType(
+                                                                      s.getScheduleType())
+                                                              .title(s.getTitle())
+                                                              .description(
+                                                                      s.getDescription())
+                                                              .writerId(
+                                                                      s.getWriter()
+                                                                       .getId());
+                                     switch (s.getScheduleType()) {
+                                         case EVENT:
+                                             builder.startAt(s.getStartAt())
+                                                    .endAt(s.getEndAt())
+                                                    .build();
+                                             break;
+                                         case TASK:
+                                             builder.taskAt(s.getStartAt());
+                                             break;
+                                         case NOTIFICATION:
+                                             builder.notifyAt(s.getStartAt());
+                                             break;
+                                     }
+                                     return builder.build();
+                                 })
+                                 .collect(toList());
     }
 }

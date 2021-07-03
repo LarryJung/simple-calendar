@@ -27,6 +27,7 @@ public class Schedule {
     @ManyToOne(optional = false)
     private User writer;
 
+    @Enumerated(value = EnumType.STRING)
     private ScheduleType scheduleType;
     private LocalDateTime createdAt;
 

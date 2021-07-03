@@ -24,7 +24,8 @@ import static org.mockito.Mockito.when;
 public class LoginServiceTest {
 
     private final UserService userService = Mockito.mock(UserService.class);
-    private final LoginService loginService = new LoginService(userService);
+    private final ScheduleService scheduleService = Mockito.mock(ScheduleService.class);
+    private final LoginService loginService = new LoginService(userService, scheduleService);
 
     @Test
     @DisplayName("회원가입 - 성공")
@@ -41,7 +42,7 @@ public class LoginServiceTest {
                                                            1,
                                                            1)),
                             session);
-
+        verify(scheduleService, new Times(1)).createEvent(any(), any());
         assertEquals(1L,
                      (Long) session.getAttribute(LOGIN_SESSION_KEY));
     }

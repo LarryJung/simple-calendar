@@ -1,11 +1,11 @@
 package com.larry.lallender.lallender.service;
 
 import com.larry.lallender.lallender.domain.entity.User;
+import com.larry.lallender.lallender.dto.EventCreateReq;
 import com.larry.lallender.lallender.dto.UserCreateReq;
 import com.larry.lallender.lallender.dto.UserSignInReq;
 import com.larry.lallender.lallender.dto.UserSignUpReq;
 import com.larry.lallender.lallender.exception.CalendarException;
-import com.larry.lallender.lallender.exception.ErrorCode;
 import com.larry.lallender.lallender.util.BCryptEncryptor;
 import com.larry.lallender.lallender.util.Encryptor;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 
+import java.util.Collections;
+
 import static com.larry.lallender.lallender.exception.ErrorCode.PASSWORD_NOT_MATCH;
 
 @Service
@@ -21,25 +23,34 @@ import static com.larry.lallender.lallender.exception.ErrorCode.PASSWORD_NOT_MAT
 public class LoginService {
     public final static String LOGIN_SESSION_KEY = "USER_ID";
     private final UserService userService;
+    private final ScheduleService scheduleService;
     private final Encryptor encryptor = new BCryptEncryptor();
 
     @Transactional
     public void signUp(UserSignUpReq req, HttpSession session) {
-        User newUser = userService.create(new UserCreateReq(req.getName(),
-                                                            req.getEmail(),
-                                                            encryptor.encrypt(req.getPassword()),
-                                                            req.getBirthday()));
+        final User newUser = userService.create(new UserCreateReq(req.getName(),
+                                                                  req.getEmail(),
+                                                                  encryptor.encrypt(req.getPassword()),
+                                                                  req.getBirthday()));
+        if (req.getBirthday() != null) {
+            scheduleService.createEvent(newUser,
+                                        new EventCreateReq(req.getBirthday()
+                                                              .atStartOfDay(),
+                                                           null,
+                                                           "생일",
+                                                           null, Collections.emptyList()));
+        }
         session.setAttribute(LOGIN_SESSION_KEY,
                              newUser.getId());
     }
 
     @Transactional
     public void signIn(UserSignInReq req, HttpSession session) {
-        Long userId = (Long) session.getAttribute(LOGIN_SESSION_KEY);
+        final Long userId = (Long) session.getAttribute(LOGIN_SESSION_KEY);
         if (userId != null) {
             return;
         }
-        User user = userService.findByEmail(req.getEmail());
+        final User user = userService.findByEmail(req.getEmail());
         if (encryptor.isMatch(req.getPassword(),
                               user.getPassword())) {
             session.setAttribute(LOGIN_SESSION_KEY,

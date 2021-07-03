@@ -2,12 +2,14 @@ package com.larry.lallender.lallender.service;
 
 import com.larry.lallender.lallender.domain.entity.User;
 import com.larry.lallender.lallender.domain.repository.UserRepository;
+import com.larry.lallender.lallender.dto.EventCreateReq;
 import com.larry.lallender.lallender.dto.UserCreateReq;
 import com.larry.lallender.lallender.exception.CalendarException;
-import com.larry.lallender.lallender.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 
 import static com.larry.lallender.lallender.exception.ErrorCode.ALREADY_EXISTS_USER;
 import static com.larry.lallender.lallender.exception.ErrorCode.USER_NOT_FOUND;
@@ -20,6 +22,7 @@ import static com.larry.lallender.lallender.exception.ErrorCode.USER_NOT_FOUND;
 public class UserService {
     private final UserRepository userRepository;
 
+    // TODO 테스트 코드 추가
     @Transactional
     public User create(UserCreateReq req) {
         userRepository.findByEmail(req.getEmail())
