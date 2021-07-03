@@ -7,7 +7,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     PASSWORD_NOT_MATCH("비밀번호 불일치", HttpStatus.UNAUTHORIZED),
     ALREADY_EXISTS_USER("이미 있는 계정", HttpStatus.BAD_REQUEST),
-    USER_NOT_FOUND("존재하지 않는 계정", HttpStatus.UNAUTHORIZED);
+    USER_NOT_FOUND("존재하지 않는 계정", HttpStatus.UNAUTHORIZED),
+    VALIDATION_FAIL("값이 유효하지 않음", HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final HttpStatus httpStatus;
