@@ -212,14 +212,13 @@ public class ScheduleServiceTest {
                                                                                                     new NotificationCreateReq.RepeatPeriod(
                                                                                                             1,
                                                                                                             TimeUnit.DAY),
-                                                                                                    3,
-                                                                                                    null,
-                                                                                                    null
+                                                                                                    3
                                                                                             )));
         assertEquals(3, notifications.size());
         assertEquals(List.of(time1, time1.plusDays(1), time1.plusDays(2)),
                      notifications.stream()
                                   .map(Notification::getNotifyAt)
-                                  .sorted());
+                                  .sorted()
+                                  .collect(Collectors.toList()));
     }
 }
