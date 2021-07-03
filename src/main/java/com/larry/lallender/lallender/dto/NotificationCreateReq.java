@@ -1,12 +1,18 @@
 package com.larry.lallender.lallender.dto;
 
 import com.larry.lallender.lallender.util.DayOfWeekType;
+import com.larry.lallender.lallender.util.TimeIncrementor;
 import com.larry.lallender.lallender.util.TimeUnit;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.toList;
 
 @Data
 public class NotificationCreateReq {
@@ -25,7 +31,9 @@ public class NotificationCreateReq {
         if (repeatInfo == null) {
             return Collections.singletonList(notifyAt);
         }
-        return Collections.emptyList();
+        return IntStream.range(0, repeatInfo.repeatTimes)
+                        .mapToObj(i -> notifyAt.plusDays(repeatInfo.repeatPeriod.unit * i))
+                        .collect(toList());
     }
 
     @Data
@@ -38,7 +46,7 @@ public class NotificationCreateReq {
 
     @Data
     public static class RepeatPeriod {
-        private final int quantity;
+        private final int unit;
         private final TimeUnit timeUnit;
     }
 
