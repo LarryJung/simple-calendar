@@ -5,13 +5,13 @@ import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.domain.repository.ScheduleRepository;
 import com.larry.lallender.lallender.dto.*;
 import com.larry.lallender.lallender.exception.CalendarException;
-import com.larry.lallender.lallender.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.larry.lallender.lallender.exception.ErrorCode.EVENT_CREATE_OVERLAPPED_PERIOD;
 import static java.util.stream.Collectors.toList;
@@ -81,22 +81,21 @@ public class ScheduleService {
     public List<ScheduleRes> getSchedules(AuthUser authUser) {
         return scheduleRepository.findAllByWriter_Id(authUser.getId())
                                  .stream()
-                                 .map(s -> {
-                                     switch (s.getScheduleType()) {
-                                         case EVENT:
-                                             return s.toEvent()
-                                                     .toRes();
-                                         case TASK:
-                                             return s.toTask()
-                                                     .toRes();
-                                         case NOTIFICATION:
-                                             return s.toNotification()
-                                                     .toRes();
-                                         default:
-                                             throw new CalendarException(ErrorCode.BAD_REQUEST);
-                                     }
-                                 })
+                                 .map(Schedule::toRes)
                                  .collect(toList());
     }
 
+    @Transactional
+    public List<ScheduleRes> getSchedulesByDay(AuthUser authUser, LocalDate date) {
+        return Stream.concat(engagementRepository.findAllByAttendeeId(authUser.getId())
+                                                 .stream()
+                                                 .filter(engagement -> engagement.isOverlapped(date))
+                                                 .map(engagement -> engagement.getEvent()
+                                                                              .toRes()),
+                             scheduleRepository.findAllByWriter_Id(authUser.getId())
+                                               .stream()
+                                               .filter(schedule -> schedule.isOverlapped(date))
+                                               .map(Schedule::toRes))
+                     .collect(toList());
+    }
 }

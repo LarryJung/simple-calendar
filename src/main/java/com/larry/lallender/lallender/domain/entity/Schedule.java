@@ -1,9 +1,13 @@
 package com.larry.lallender.lallender.domain.entity;
 
+import com.larry.lallender.lallender.dto.ScheduleRes;
+import com.larry.lallender.lallender.exception.CalendarException;
+import com.larry.lallender.lallender.exception.ErrorCode;
+import com.larry.lallender.lallender.util.Period;
 import lombok.*;
 
 import javax.persistence.*;
-import java.security.PublicKey;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Builder(access = AccessLevel.PRIVATE)
@@ -73,5 +77,25 @@ public class Schedule {
 
     public Notification toNotification() {
         return new Notification(this, writer, title, startAt);
+    }
+
+    public ScheduleRes toRes() {
+        switch (scheduleType) {
+            case EVENT:
+                return toEvent()
+                        .toRes();
+            case TASK:
+                return toTask()
+                        .toRes();
+            case NOTIFICATION:
+                return toNotification()
+                        .toRes();
+            default:
+                throw new CalendarException(ErrorCode.BAD_REQUEST);
+        }
+    }
+
+    public boolean isOverlapped(LocalDate date) {
+        return Period.of(startAt, endAt).isOverlapped(date);
     }
 }

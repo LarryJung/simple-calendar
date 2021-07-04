@@ -1,5 +1,6 @@
 package com.larry.lallender.lallender.dto;
 
+import com.larry.lallender.lallender.domain.entity.ScheduleType;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,4 +12,9 @@ public class TaskRes implements ScheduleRes {
     private final String title;
     private final String description;
     private final LocalDateTime taskAt;
+
+    @Override
+    public ScheduleType getScheduleType() {
+        return ScheduleType.TASK;
+    }
 }

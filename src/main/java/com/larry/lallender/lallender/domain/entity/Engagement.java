@@ -1,9 +1,11 @@
 package com.larry.lallender.lallender.domain.entity;
 
 import com.larry.lallender.lallender.dto.EngagementRes;
+import com.larry.lallender.lallender.util.Period;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -51,5 +53,9 @@ public class Engagement {
 
     public EngagementRes toRes() {
         return new EngagementRes(id, getEvent().toRes(), attendee.toRes(), status);
+    }
+
+    public boolean isOverlapped(LocalDate date) {
+        return schedule.isOverlapped(date);
     }
 }
