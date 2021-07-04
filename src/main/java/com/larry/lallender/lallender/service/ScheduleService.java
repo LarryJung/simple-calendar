@@ -1,19 +1,19 @@
 package com.larry.lallender.lallender.service;
 
 import com.larry.lallender.lallender.domain.entity.*;
-import com.larry.lallender.lallender.domain.entity.dto.*;
 import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.domain.repository.ScheduleRepository;
-import com.larry.lallender.lallender.dto.EventCreateReq;
-import com.larry.lallender.lallender.dto.NotificationCreateReq;
-import com.larry.lallender.lallender.dto.SimpleScheduleDto;
-import com.larry.lallender.lallender.dto.TaskCreateReq;
+import com.larry.lallender.lallender.dto.*;
+import com.larry.lallender.lallender.exception.CalendarException;
+import com.larry.lallender.lallender.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import static com.larry.lallender.lallender.exception.ErrorCode.EVENT_CREATE_OVERLAPPED_PERIOD;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -23,84 +23,80 @@ public class ScheduleService {
     private final EngagementRepository engagementRepository;
     private final UserService userService;
 
-    public Task createTask(User writer, TaskCreateReq req) {
+    @Transactional
+    public TaskRes createTask(AuthUser authUser, TaskCreateReq req) {
+        final User writer = userService.findById(authUser.getId());
         final Schedule schedule = scheduleRepository.save(Schedule.ofTask(req.getTitle(),
                                                                           req.getDescription(),
                                                                           req.getTaskAt(),
                                                                           writer));
-        return schedule.toTask();
+        return schedule.toTask()
+                       .toRes();
     }
 
     @Transactional
-    public EventWithEngagement createEvent(User writer, EventCreateReq req) {
+    public EventWithEngagement createEvent(AuthUser authUser, EventCreateReq req) {
+        final User writer = userService.findById(authUser.getId());
         final List<Engagement> engagementList =
-                engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtBefore(req.getAttendeeIds(),
-                                                                                  req.getStartAt());
+                engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtAfter(req.getAttendeeIds(),
+                                                                                 req.getStartAt());
         if (engagementList
                 .stream()
                 .anyMatch(e -> e.getEvent()
                                 .isOverlapped(req.getStartAt(), req.getEndAt())
                         && e.getStatus() == EngagementStatus.ACCEPTED)) {
-            throw new RuntimeException("cannot create event - time overlap");
+            throw new CalendarException(EVENT_CREATE_OVERLAPPED_PERIOD);
         }
-        final Event newEvent = scheduleRepository.save(Schedule.ofEvent(req.getStartAt(),
-                                                                        req.getEndAt(),
-                                                                        req.getTitle(),
-                                                                        req.getDescription(),
-                                                                        writer))
-                                                 .toEvent();
-        final List<Engagement> engagements = req.getAttendeeIds()
-                                                .stream()
-                                                .map(a -> engagementRepository.save(
-                                                        Engagement.of(newEvent,
-                                                                      userService.findById(a)))
-                                                )
-                                                .collect(toList());
-        return new EventWithEngagement(newEvent, engagements);
+        final Event event = scheduleRepository.save(Schedule.ofEvent(req.getStartAt(),
+                                                                     req.getEndAt(),
+                                                                     req.getTitle(),
+                                                                     req.getDescription(),
+                                                                     writer))
+                                              .toEvent();
+        final List<EngagementRes> engagements = req.getAttendeeIds()
+                                                   .stream()
+                                                   .map(a -> engagementRepository.save(
+                                                           Engagement.of(event,
+                                                                         userService.findById(a)))
+                                                                                 .toRes()
+                                                   )
+                                                   .collect(toList());
+        return new EventWithEngagement(event.toRes(), engagements);
     }
 
     @Transactional
-    public List<Notification> createNotification(User writer, NotificationCreateReq req) {
+    public List<NotificationRes> createNotification(AuthUser authUser, NotificationCreateReq req) {
+        final User writer = userService.findById(authUser.getId());
         return req.getFlattenedTimes()
                   .stream()
                   .map(notifyAt -> scheduleRepository.save(Schedule.ofNotification(notifyAt,
                                                                                    req.getTitle(),
                                                                                    writer))
-                                                     .toNotification())
+                                                     .toNotification()
+                                                     .toRes())
                   .collect(toList());
     }
 
     @Transactional
-    public List<SimpleScheduleDto> getSchedules(Long userId) {
-        return scheduleRepository.findAllByWriter_Id(userId)
+    public List<ScheduleRes> getSchedules(AuthUser authUser) {
+        return scheduleRepository.findAllByWriter_Id(authUser.getId())
                                  .stream()
                                  .map(s -> {
-                                     SimpleScheduleDto.SimpleScheduleDtoBuilder builder =
-                                             SimpleScheduleDto.builder()
-                                                              .id(s.getId())
-                                                              .scheduleType(
-                                                                      s.getScheduleType())
-                                                              .title(s.getTitle())
-                                                              .description(
-                                                                      s.getDescription())
-                                                              .writerId(
-                                                                      s.getWriter()
-                                                                       .getId());
                                      switch (s.getScheduleType()) {
                                          case EVENT:
-                                             builder.startAt(s.getStartAt())
-                                                    .endAt(s.getEndAt())
-                                                    .build();
-                                             break;
+                                             return s.toEvent()
+                                                     .toRes();
                                          case TASK:
-                                             builder.taskAt(s.getStartAt());
-                                             break;
+                                             return s.toTask()
+                                                     .toRes();
                                          case NOTIFICATION:
-                                             builder.notifyAt(s.getStartAt());
-                                             break;
+                                             return s.toNotification()
+                                                     .toRes();
+                                         default:
+                                             throw new CalendarException(ErrorCode.BAD_REQUEST);
                                      }
-                                     return builder.build();
                                  })
                                  .collect(toList());
     }
+
 }

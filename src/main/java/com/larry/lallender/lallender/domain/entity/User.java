@@ -1,5 +1,6 @@
 package com.larry.lallender.lallender.domain.entity;
 
+import com.larry.lallender.lallender.dto.UserRes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,8 +21,11 @@ public class User {
     @GeneratedValue
     private Long id;
     private String name;
-    // TODO need validation, unique
     private String email;
     private String password;
     private LocalDate birthday;
+
+    public UserRes toRes() {
+        return new UserRes(id, name, email, birthday);
+    }
 }

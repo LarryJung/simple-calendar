@@ -1,8 +1,11 @@
 package com.larry.lallender.lallender.dto;
 
+import com.larry.lallender.lallender.exception.CalendarException;
+import com.larry.lallender.lallender.exception.ErrorCode;
 import com.larry.lallender.lallender.util.TimeUnit;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -12,16 +15,11 @@ import static java.util.stream.Collectors.toList;
 
 @Data
 public class NotificationCreateReq {
+    @NotNull
     private final String title;
+    @NotNull
     private final LocalDateTime notifyAt;
     private final RepeatInfo repeatInfo;
-
-    public RepeatInfo getRepeatInfo() {
-        if (repeatInfo == null) {
-            return new RepeatInfo(new RepeatPeriod(1, TimeUnit.DAY), 1);
-        }
-        return repeatInfo;
-    }
 
     public List<LocalDateTime> getFlattenedTimes() {
         if (repeatInfo == null) {
@@ -29,17 +27,18 @@ public class NotificationCreateReq {
         }
         return IntStream.range(0, repeatInfo.repeatTimes)
                         .mapToObj(i -> {
+                                      long increment = (long) repeatInfo.repeatPeriod.unit * i;
                                       switch (repeatInfo.repeatPeriod.timeUnit) {
                                           case DAY:
-                                              return notifyAt.plusDays((long) repeatInfo.repeatPeriod.unit * i);
+                                              return notifyAt.plusDays(increment);
                                           case WEEK:
-                                              return notifyAt.plusWeeks((long) repeatInfo.repeatPeriod.unit * i);
+                                              return notifyAt.plusWeeks(increment);
                                           case MONTH:
-                                              return notifyAt.plusMonths((long) repeatInfo.repeatPeriod.unit * i);
+                                              return notifyAt.plusMonths(increment);
                                           case YEAR:
-                                              return notifyAt.plusYears((long) repeatInfo.repeatPeriod.unit * i);
+                                              return notifyAt.plusYears(increment);
                                           default:
-                                              throw new RuntimeException("not supported");
+                                              throw new CalendarException(ErrorCode.BAD_REQUEST);
                                       }
                                   }
                         )

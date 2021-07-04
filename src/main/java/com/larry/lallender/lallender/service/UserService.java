@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.List;
 
 import static com.larry.lallender.lallender.exception.ErrorCode.ALREADY_EXISTS_USER;
 import static com.larry.lallender.lallender.exception.ErrorCode.USER_NOT_FOUND;
@@ -47,5 +48,10 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                              .orElseThrow(() -> new CalendarException(USER_NOT_FOUND));
+    }
+
+    @Transactional
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 }

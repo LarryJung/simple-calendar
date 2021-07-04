@@ -1,12 +1,9 @@
 package com.larry.lallender.lallender.domain.entity;
 
-import com.larry.lallender.lallender.domain.entity.dto.Event;
-import com.larry.lallender.lallender.domain.entity.dto.Notification;
-import com.larry.lallender.lallender.domain.entity.dto.ScheduleType;
-import com.larry.lallender.lallender.domain.entity.dto.Task;
 import lombok.*;
 
 import javax.persistence.*;
+import java.security.PublicKey;
 import java.time.LocalDateTime;
 
 @Builder(access = AccessLevel.PRIVATE)
@@ -31,14 +28,6 @@ public class Schedule {
     private ScheduleType scheduleType;
     private LocalDateTime createdAt;
 
-    public static Schedule ofEvent(Event event) {
-        return ofEvent(event.getStartAt(),
-                       event.getEndAt(),
-                       event.getTitle(),
-                       event.getDescription(),
-                       event.getWriter());
-    }
-
     public static Schedule ofEvent(LocalDateTime startAt, LocalDateTime endAt, String title,
                                    String description, User writer) {
         return Schedule.builder()
@@ -59,7 +48,7 @@ public class Schedule {
                        .title(title)
                        .description(description)
                        .writer(writer)
-                       .scheduleType(ScheduleType.EVENT)
+                       .scheduleType(ScheduleType.TASK)
                        .createdAt(LocalDateTime.now())
                        .build();
     }
@@ -69,20 +58,20 @@ public class Schedule {
                        .startAt(notifyAt)
                        .title(title)
                        .writer(writer)
-                       .scheduleType(ScheduleType.EVENT)
+                       .scheduleType(ScheduleType.NOTIFICATION)
                        .createdAt(LocalDateTime.now())
                        .build();
     }
 
     public Task toTask() {
-        return new Task(id, writer, title, description, startAt, createdAt);
+        return new Task(this, writer, title, description, startAt);
     }
 
     public Event toEvent() {
-        return new Event(id, startAt, endAt, createdAt, title, description, writer);
+        return new Event(this, startAt, endAt, createdAt, title, description, writer);
     }
 
     public Notification toNotification() {
-        return new Notification(id, writer, title, startAt);
+        return new Notification(this, writer, title, startAt);
     }
 }

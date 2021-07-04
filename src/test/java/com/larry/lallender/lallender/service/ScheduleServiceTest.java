@@ -1,14 +1,10 @@
 package com.larry.lallender.lallender.service;
 
 import com.larry.lallender.lallender.domain.entity.*;
-import com.larry.lallender.lallender.domain.entity.dto.EventWithEngagement;
-import com.larry.lallender.lallender.domain.entity.dto.Notification;
-import com.larry.lallender.lallender.domain.entity.dto.Task;
+import com.larry.lallender.lallender.dto.EventWithEngagement;
 import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.domain.repository.ScheduleRepository;
-import com.larry.lallender.lallender.dto.EventCreateReq;
-import com.larry.lallender.lallender.dto.NotificationCreateReq;
-import com.larry.lallender.lallender.dto.TaskCreateReq;
+import com.larry.lallender.lallender.dto.*;
 import com.larry.lallender.lallender.util.TimeUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +22,7 @@ import static org.mockito.Mockito.when;
 public class ScheduleServiceTest {
     private static final LocalDateTime time1 = LocalDateTime.of(2021, 7, 1, 0, 0, 0);
     private static final LocalDateTime time2 = LocalDateTime.of(2021, 7, 1, 12, 0, 0);
+    private static final AuthUser authUser1 = new AuthUser(1L);
     private static final User user1 = User.builder()
                                           .id(1L)
                                           .email("my@gmail.com")
@@ -43,12 +40,12 @@ public class ScheduleServiceTest {
     void test1() {
         final User writer = user1;
         final TaskCreateReq req = new TaskCreateReq("방청소", null, time1);
-
+        when(userService.findById(1L)).thenReturn(user1);
         when(scheduleRepository.save(any())).thenReturn(Schedule.ofTask(req.getTitle(),
                                                                         req.getDescription(),
                                                                         req.getTaskAt(),
                                                                         writer));
-        final Task task = scheduleService.createTask(writer, req);
+        final TaskRes task = scheduleService.createTask(authUser1, req);
         assertEquals("방청소", task.getTitle());
         assertEquals(1L,
                      task.getWriter()
@@ -58,9 +55,7 @@ public class ScheduleServiceTest {
     @Test
     @DisplayName("이벤트 생성한다.")
     void test2() {
-        final User writer = user1;
-
-        when(engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtBefore(any(), any()))
+        when(engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtAfter(any(), any()))
                 .thenReturn(List.of());
         when(scheduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(engagementRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -68,13 +63,13 @@ public class ScheduleServiceTest {
                                                                        .id(invocation.getArgument(0))
                                                                        .build());
 
-        final EventWithEngagement result = scheduleService.createEvent(writer,
-                                                                       new EventCreateReq(time1,
-                                                                                          time2,
-                                                                                          "작당모의",
-                                                                                          "비밀",
-                                                                                          List.of(2L,
-                                                                                                  3L)));
+        final EventWithEngagement result = scheduleService.createEvent(authUser1,
+                                                                       new EventCreateReq(
+                                                                               "작당모의",
+                                                                               "비밀",
+                                                                               time1,
+                                                                               time2,
+                                                                               List.of(2L, 3L)));
         assertEquals(result.getEvent()
                            .getTitle(), "작당모의");
         assertEquals(result.getEvent()
@@ -93,7 +88,7 @@ public class ScheduleServiceTest {
     @DisplayName("이벤트 생성한다. - 겹치는 이벤트가 있지만 수락 상태는 아님")
     void test3() {
         final User writer = user1;
-        when(engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtBefore(any(), any()))
+        when(engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtAfter(any(), any()))
                 .thenReturn(List.of(
                         Engagement.of(Schedule.ofEvent(time1,
                                                        time2,
@@ -121,13 +116,13 @@ public class ScheduleServiceTest {
                                                                        .id(invocation.getArgument(0))
                                                                        .build());
 
-        final EventWithEngagement result = scheduleService.createEvent(writer,
-                                                                       new EventCreateReq(time1,
-                                                                                          time2,
-                                                                                          "작당모의",
-                                                                                          "비밀",
-                                                                                          List.of(2L,
-                                                                                                  3L)));
+        final EventWithEngagement result = scheduleService.createEvent(authUser1,
+                                                                       new EventCreateReq(
+                                                                               "작당모의",
+                                                                               "비밀",
+                                                                               time1,
+                                                                               time2,
+                                                                               List.of(2L, 3L)));
         assertEquals(result.getEvent()
                            .getTitle(), "작당모의");
         assertEquals(result.getEvent()
@@ -144,8 +139,7 @@ public class ScheduleServiceTest {
     @Test
     @DisplayName("이벤트 생성한다. - 겹치는 이벤트가 있지만 수락 상태는 아님")
     void test4() {
-        final User writer = user1;
-        when(engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtBefore(any(), any()))
+        when(engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtAfter(any(), any()))
                 .thenReturn(List.of(
                         Engagement.of(Schedule.ofEvent(time1,
                                                        time2,
@@ -175,12 +169,12 @@ public class ScheduleServiceTest {
                                                                        .build());
 
         final RuntimeException ex = assertThrows(RuntimeException.class,
-                                                 () -> scheduleService.createEvent(writer,
+                                                 () -> scheduleService.createEvent(authUser1,
                                                                                    new EventCreateReq(
-                                                                                           time1,
-                                                                                           time2,
                                                                                            "작당모의",
                                                                                            "비밀",
+                                                                                           time1,
+                                                                                           time2,
                                                                                            List.of(2L,
                                                                                                    3L))));
         assertEquals("cannot create event - time overlap", ex.getMessage());
@@ -189,13 +183,13 @@ public class ScheduleServiceTest {
     @Test
     @DisplayName("알림 생성한다. - 반복 없음")
     void test5() {
-        final User writer = user1;
         when(scheduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        final List<Notification> notifications = scheduleService.createNotification(writer,
-                                                                                    new NotificationCreateReq(
-                                                                                            "스프링 공부",
-                                                                                            time1,
-                                                                                            null));
+        when(userService.findById(any())).thenReturn(user1);
+        final List<NotificationRes> notifications = scheduleService.createNotification(authUser1,
+                                                                                       new NotificationCreateReq(
+                                                                                               "스프링 공부",
+                                                                                               time1,
+                                                                                               null));
         assertEquals(1, notifications.size());
         assertEquals(time1,
                      notifications.get(0)
@@ -205,22 +199,22 @@ public class ScheduleServiceTest {
     @Test
     @DisplayName("알림 생성한다. - 일 반복")
     void test6() {
-        final User writer = user1;
         when(scheduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        final List<Notification> notifications = scheduleService.createNotification(writer,
-                                                                                    new NotificationCreateReq(
-                                                                                            "스프링 공부",
-                                                                                            time1,
-                                                                                            new NotificationCreateReq.RepeatInfo(
-                                                                                                    new NotificationCreateReq.RepeatPeriod(
-                                                                                                            1,
-                                                                                                            TimeUnit.DAY),
-                                                                                                    3
-                                                                                            )));
+        when(userService.findById(any())).thenReturn(user1);
+        final List<NotificationRes> notifications = scheduleService.createNotification(authUser1,
+                                                                                       new NotificationCreateReq(
+                                                                                               "스프링 공부",
+                                                                                               time1,
+                                                                                               new NotificationCreateReq.RepeatInfo(
+                                                                                                       new NotificationCreateReq.RepeatPeriod(
+                                                                                                               1,
+                                                                                                               TimeUnit.DAY),
+                                                                                                       3
+                                                                                               )));
         assertEquals(3, notifications.size());
         assertEquals(List.of(time1, time1.plusDays(1), time1.plusDays(2)),
                      notifications.stream()
-                                  .map(Notification::getNotifyAt)
+                                  .map(NotificationRes::getNotifyAt)
                                   .sorted()
                                   .collect(Collectors.toList()));
     }

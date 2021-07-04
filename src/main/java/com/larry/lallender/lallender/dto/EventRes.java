@@ -3,13 +3,13 @@ package com.larry.lallender.lallender.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
-public class EventCreateReq {
-    private final String title;
-    private final String description;
+public class EventRes implements ScheduleRes{
+    private final Long scheduleId;
     private final LocalDateTime startAt;
     private final LocalDateTime endAt;
-    private final List<Long> attendeeIds;
+    private final String title;
+    private final String description;
+    private final UserRes writer;
 }

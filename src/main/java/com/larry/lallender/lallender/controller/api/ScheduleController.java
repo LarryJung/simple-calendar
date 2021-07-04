@@ -1,32 +1,55 @@
 package com.larry.lallender.lallender.controller.api;
 
-import com.larry.lallender.lallender.dto.SimpleScheduleDto;
-import com.larry.lallender.lallender.exception.CalendarException;
-import com.larry.lallender.lallender.exception.ErrorCode;
+import com.larry.lallender.lallender.domain.entity.EngagementStatus;
+import com.larry.lallender.lallender.dto.*;
+import com.larry.lallender.lallender.service.EngagementService;
 import com.larry.lallender.lallender.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
-
+import javax.validation.Valid;
 import java.util.List;
 
-import static com.larry.lallender.lallender.service.LoginService.LOGIN_SESSION_KEY;
-
+@RequestMapping("/api/schedules")
 @RestController
 @RequiredArgsConstructor
 public class ScheduleController {
-
     private final ScheduleService scheduleService;
+    private final EngagementService engagementService;
 
-    @GetMapping("/api/schedules")
-    public List<SimpleScheduleDto> getSchedules(HttpSession session) {
-        final Long userId = (Long) session.getAttribute(LOGIN_SESSION_KEY);
-        if (userId == null) {
-            throw new CalendarException(ErrorCode.BAD_REQUEST);
-        }
-        return scheduleService.getSchedules(userId);
+    @PostMapping("/tasks")
+    public TaskRes createTask(@Valid @RequestBody TaskCreateReq taskCreateReq,
+                              AuthUser authUser) {
+        return scheduleService.createTask(authUser, taskCreateReq);
     }
+
+    @PostMapping("/notifications")
+    public List<NotificationRes> createTask(
+            @Valid @RequestBody NotificationCreateReq notificationCreateReq,
+            AuthUser authUser) {
+        return scheduleService.createNotification(authUser, notificationCreateReq);
+    }
+
+    @PostMapping("/events")
+    public EventWithEngagement createEvent(
+            @RequestBody EventCreateReq eventCreateReq,
+            AuthUser authUser) {
+        return scheduleService.createEvent(authUser, eventCreateReq);
+    }
+
+    @GetMapping("/events/engagements/{engagementId}")
+    public EngagementStatus updateEngagement(
+            @PathVariable Long engagementId,
+            @RequestParam EngagementReplyType type,
+            AuthUser authUser) {
+        return engagementService.update(authUser, engagementId, type);
+    }
+
+    @GetMapping
+    public List<ScheduleRes> getSchedules(
+            AuthUser authUser) {
+        return scheduleService.getSchedules(authUser);
+    }
+    // update, delete ...
 
 }

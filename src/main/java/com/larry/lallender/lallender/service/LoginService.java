@@ -1,10 +1,7 @@
 package com.larry.lallender.lallender.service;
 
 import com.larry.lallender.lallender.domain.entity.User;
-import com.larry.lallender.lallender.dto.EventCreateReq;
-import com.larry.lallender.lallender.dto.UserCreateReq;
-import com.larry.lallender.lallender.dto.UserSignInReq;
-import com.larry.lallender.lallender.dto.UserSignUpReq;
+import com.larry.lallender.lallender.dto.*;
 import com.larry.lallender.lallender.exception.CalendarException;
 import com.larry.lallender.lallender.util.BCryptEncryptor;
 import com.larry.lallender.lallender.util.Encryptor;
@@ -33,11 +30,10 @@ public class LoginService {
                                                                   encryptor.encrypt(req.getPassword()),
                                                                   req.getBirthday()));
         if (req.getBirthday() != null) {
-            scheduleService.createEvent(newUser,
-                                        new EventCreateReq(req.getBirthday()
+            scheduleService.createEvent(new AuthUser(newUser.getId()),
+                                        new EventCreateReq("생일", null,
+                                                           req.getBirthday()
                                                               .atStartOfDay(),
-                                                           null,
-                                                           "생일",
                                                            null, Collections.emptyList()));
         }
         session.setAttribute(LOGIN_SESSION_KEY,

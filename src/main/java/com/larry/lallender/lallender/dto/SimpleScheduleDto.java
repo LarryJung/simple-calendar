@@ -1,7 +1,7 @@
 package com.larry.lallender.lallender.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.larry.lallender.lallender.domain.entity.dto.ScheduleType;
+import com.larry.lallender.lallender.domain.entity.ScheduleType;
 import lombok.Builder;
 import lombok.Data;
 

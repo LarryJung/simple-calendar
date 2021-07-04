@@ -91,6 +91,6 @@ public class LoginServiceTest {
         final RuntimeException ex = assertThrows(RuntimeException.class,
                                            () -> loginService.signIn(new UserSignInReq("email", password), session));
 
-        assertEquals("password not match", ex.getMessage());
+        assertEquals("비밀번호 불일치", ex.getMessage());
     }
 }

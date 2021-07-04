@@ -1,7 +1,6 @@
 package com.larry.lallender.lallender.domain.entity;
 
-import com.larry.lallender.lallender.domain.entity.dto.EngagementStatus;
-import com.larry.lallender.lallender.domain.entity.dto.Event;
+import com.larry.lallender.lallender.dto.EngagementRes;
 import lombok.*;
 
 import javax.persistence.*;
@@ -37,12 +36,20 @@ public class Engagement {
         return this;
     }
 
+    public Engagement reject() {
+        this.status = EngagementStatus.REJECTED;
+        return this;
+    }
+
     public static Engagement of(Event event, User attendee) {
         return Engagement.builder()
-                         .schedule(Schedule.ofEvent(event))
+                         .schedule(event.getSchedule())
                          .attendee(attendee)
                          .status(EngagementStatus.REQUESTED)
                          .build();
     }
 
+    public EngagementRes toRes() {
+        return new EngagementRes(id, getEvent().toRes(), attendee.toRes(), status);
+    }
 }
