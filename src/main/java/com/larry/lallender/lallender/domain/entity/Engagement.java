@@ -1,7 +1,6 @@
 package com.larry.lallender.lallender.domain.entity;
 
 import com.larry.lallender.lallender.dto.EngagementRes;
-import com.larry.lallender.lallender.util.Period;
 import lombok.*;
 
 import javax.persistence.*;
@@ -56,6 +55,6 @@ public class Engagement {
     }
 
     public boolean isOverlapped(LocalDate date) {
-        return schedule.isOverlapped(date);
+        return this.schedule.isOverlapped(date);
     }
 }

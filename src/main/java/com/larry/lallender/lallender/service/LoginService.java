@@ -11,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 
-import java.util.Collections;
-
 import static com.larry.lallender.lallender.exception.ErrorCode.PASSWORD_NOT_MATCH;
 
 @Service
@@ -21,6 +19,7 @@ public class LoginService {
     public final static String LOGIN_SESSION_KEY = "USER_ID";
     private final UserService userService;
     private final ScheduleService scheduleService;
+    private final EmailService emailService;
     private final Encryptor encryptor = new BCryptEncryptor();
 
     @Transactional
@@ -29,12 +28,18 @@ public class LoginService {
                                                                   req.getEmail(),
                                                                   encryptor.encrypt(req.getPassword()),
                                                                   req.getBirthday()));
+        emailService.send(req.getEmail(),
+                          "주제입니다",
+                          String.format(
+                                  "<h1> 안녕하세요 </h1> <p>your email is %s.</p> <a " +
+                                          "href='http://localhost:8080/api/ping'>click</a>",
+                                  req.getEmail()));
         if (req.getBirthday() != null) {
-            scheduleService.createEvent(new AuthUser(newUser.getId()),
-                                        new EventCreateReq("생일", null,
-                                                           req.getBirthday()
-                                                              .atStartOfDay(),
-                                                           null, Collections.emptyList()));
+            scheduleService.createNotification(new AuthUser(newUser.getId()),
+                                               new NotificationCreateReq("생일",
+                                                                         req.getBirthday()
+                                                                            .atStartOfDay(),
+                                                                         null));
         }
         session.setAttribute(LOGIN_SESSION_KEY,
                              newUser.getId());

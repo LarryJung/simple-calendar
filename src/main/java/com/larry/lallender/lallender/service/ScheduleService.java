@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -87,15 +89,16 @@ public class ScheduleService {
 
     @Transactional
     public List<ScheduleRes> getSchedulesByDay(AuthUser authUser, LocalDate date) {
-        return Stream.concat(engagementRepository.findAllByAttendeeId(authUser.getId())
-                                                 .stream()
-                                                 .filter(engagement -> engagement.isOverlapped(date))
-                                                 .map(engagement -> engagement.getEvent()
-                                                                              .toRes()),
-                             scheduleRepository.findAllByWriter_Id(authUser.getId())
-                                               .stream()
-                                               .filter(schedule -> schedule.isOverlapped(date))
-                                               .map(Schedule::toRes))
-                     .collect(toList());
+        return Stream.concat(
+                scheduleRepository.findAllByWriter_Id(authUser.getId())
+                                  .stream()
+                                  .filter(schedule -> schedule.isOverlapped(date))
+                                  .map(Schedule::toRes),
+                engagementRepository.findAllByAttendeeId(authUser.getId())
+                                    .stream()
+                                    .filter(engagement -> engagement.isOverlapped(date))
+                                    .map(engagement -> engagement.getEvent()
+                                                                 .toRes())
+        ).collect(toList());
     }
 }

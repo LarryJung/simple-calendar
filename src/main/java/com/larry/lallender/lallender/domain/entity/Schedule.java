@@ -9,6 +9,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Builder(access = AccessLevel.PRIVATE)
 @Getter
@@ -96,6 +97,6 @@ public class Schedule {
     }
 
     public boolean isOverlapped(LocalDate date) {
-        return Period.of(startAt, endAt).isOverlapped(date);
+        return Period.of(this.startAt, this.endAt).isOverlapped(date);
     }
 }

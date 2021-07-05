@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RequestMapping("/api/schedules")
@@ -54,18 +53,14 @@ public class ScheduleController {
         return scheduleService.getSchedules(authUser);
     }
 
-    @GetMapping("/day")
-    public List<ScheduleRes> getSchedulesByDay(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            AuthUser authUser) {
-        if (date == null) {
-            return scheduleService.getSchedulesByDay(authUser,
-                                                     LocalDateTime.now()
-                                                                  .toLocalDate());
-        }
-        return scheduleService.getSchedulesByDay(authUser, date);
-    }
-
     // update, delete ...
 
+    // query api
+    @GetMapping("/day")
+    public List<ScheduleRes> getSchedulesByDay(
+            AuthUser authUser,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return scheduleService.getSchedulesByDay(authUser, date);
+    }
 }
