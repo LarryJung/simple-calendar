@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -21,6 +19,7 @@ import static java.util.stream.Collectors.toList;
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
+    private final EmailService emailService;
     private final ScheduleRepository scheduleRepository;
     private final EngagementRepository engagementRepository;
     private final UserService userService;
@@ -55,14 +54,30 @@ public class ScheduleService {
                                                                      req.getDescription(),
                                                                      writer))
                                               .toEvent();
-        final List<EngagementRes> engagements = req.getAttendeeIds()
-                                                   .stream()
-                                                   .map(a -> engagementRepository.save(
-                                                           Engagement.of(event,
-                                                                         userService.findById(a)))
-                                                                                 .toRes()
-                                                   )
-                                                   .collect(toList());
+        final List<User> attendees = req.getAttendeeIds()
+                                        .stream()
+                                        .map(userService::findById)
+                                        .collect(toList());
+        final List<EngagementRes> engagements = attendees
+                .stream()
+                .map(a -> engagementRepository.save(
+                        Engagement.of(event, a))
+                                              .toRes()
+                )
+                .peek(e -> emailService.send(
+                        new EngagementEmailStuff(e.getId(),
+                                                 e.getAttendee()
+                                                  .getEmail(),
+                                                 attendees.stream()
+                                                          .map(User::getEmail)
+                                                          .collect(toList()),
+                                                 e.getEvent()
+                                                  .getTitle(),
+                                                 e.getEvent()
+                                                  .getPeriod()
+                        )
+                ))
+                .collect(toList());
         return new EventWithEngagement(event.toRes(), engagements);
     }
 
@@ -99,6 +114,7 @@ public class ScheduleService {
                                     .filter(engagement -> engagement.isOverlapped(date))
                                     .map(engagement -> engagement.getEvent()
                                                                  .toRes())
-        ).collect(toList());
+        )
+                     .collect(toList());
     }
 }

@@ -1,6 +1,7 @@
 package com.larry.lallender.lallender.dto;
 
 import com.larry.lallender.lallender.domain.entity.ScheduleType;
+import com.larry.lallender.lallender.util.Period;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -17,5 +18,9 @@ public class EventRes implements ScheduleRes{
     @Override
     public ScheduleType getScheduleType() {
         return ScheduleType.EVENT;
+    }
+
+    public Period getPeriod() {
+        return Period.of(startAt, endAt);
     }
 }

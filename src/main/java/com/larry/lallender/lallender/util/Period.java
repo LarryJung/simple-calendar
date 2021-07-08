@@ -1,9 +1,12 @@
 package com.larry.lallender.lallender.util;
 
+import lombok.Getter;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+@Getter
 public class Period {
     private final LocalDateTime startAt;
     private final LocalDateTime endAt;
