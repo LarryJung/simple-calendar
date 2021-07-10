@@ -32,7 +32,7 @@ public class EngagementService {
                                            case REJECT:
                                                return engagement.reject();
                                            default:
-                                               throw new CalendarException(ErrorCode.BAD_REQUEST);
+                                               return null;
                                        }
                                    })
                                    .orElseThrow(() -> new CalendarException(ErrorCode.BAD_REQUEST))

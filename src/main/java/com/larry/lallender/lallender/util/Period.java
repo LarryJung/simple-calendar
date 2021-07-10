@@ -20,16 +20,25 @@ public class Period {
         return new Period(startAt, endAt == null ? startAt : endAt);
     }
 
+    public static Period of(LocalDate startAt, LocalDate endAt) {
+        return new Period(startAt.atStartOfDay(),
+                          endAt == null ? startAt.atStartOfDay() : endAt.atStartOfDay());
+    }
+
     public static Period of(LocalDateTime startAt) {
         return new Period(startAt, startAt);
     }
 
+    public boolean isOverlapped(Period period) {
+        return isOverlapped(period.startAt, period.endAt);
+    }
     public boolean isOverlapped(LocalDateTime startAt, LocalDateTime endAt) {
         return !(this.endAt.isBefore(startAt) || this.startAt.isAfter(endAt));
     }
 
     public boolean isOverlapped(LocalDate date) {
-        return isOverlapped(date.atStartOfDay(), LocalDateTime.of(date, LocalTime.of(23, 59, 59, 999999999)));
+        return isOverlapped(date.atStartOfDay(),
+                            LocalDateTime.of(date, LocalTime.of(23, 59, 59, 999999999)));
     }
 
 }

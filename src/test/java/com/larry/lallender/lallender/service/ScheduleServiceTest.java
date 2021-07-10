@@ -31,9 +31,12 @@ public class ScheduleServiceTest {
     private final EngagementRepository engagementRepository =
             Mockito.mock(EngagementRepository.class);
     private final UserService userService = Mockito.mock(UserService.class);
-    private final ScheduleService scheduleService = new ScheduleService(scheduleRepository,
-                                                                        engagementRepository,
-                                                                        userService);
+    private final EmailService emailService = Mockito.mock(EmailService.class);
+    private final ScheduleService scheduleService = new ScheduleService(
+            emailService,
+            scheduleRepository,
+            engagementRepository,
+            userService);
 
     @Test
     @DisplayName("할일을 생성한다.")

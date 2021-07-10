@@ -24,7 +24,7 @@ public class LoginController {
     }
 
     @PostMapping("/api/sign-in")
-    public String signIn(@RequestBody UserSignInReq userSignInReq, HttpSession httpSession) {
+    public String signIn(@Valid @RequestBody UserSignInReq userSignInReq, HttpSession httpSession) {
         loginService.signIn(userSignInReq, httpSession);
         return "OK";
     }

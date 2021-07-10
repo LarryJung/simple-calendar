@@ -99,4 +99,8 @@ public class Schedule {
     public boolean isOverlapped(LocalDate date) {
         return Period.of(this.startAt, this.endAt).isOverlapped(date);
     }
+
+    public boolean isOverlapped(Period period) {
+        return Period.of(this.startAt, this.endAt).isOverlapped(period);
+    }
 }

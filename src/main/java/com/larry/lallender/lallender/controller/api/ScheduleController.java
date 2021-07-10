@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @RequestMapping("/api/schedules")
@@ -34,7 +35,7 @@ public class ScheduleController {
 
     @PostMapping("/events")
     public EventWithEngagement createEvent(
-            @RequestBody EventCreateReq eventCreateReq,
+            @Valid @RequestBody EventCreateReq eventCreateReq,
             AuthUser authUser) {
         return scheduleService.createEvent(authUser, eventCreateReq);
     }
@@ -53,9 +54,8 @@ public class ScheduleController {
         return scheduleService.getSchedules(authUser);
     }
 
-    // update, delete ...
+    // 조회 Api 에는 null 체크가 들어가야 한다.
 
-    // query api
     @GetMapping("/day")
     public List<ScheduleRes> getSchedulesByDay(
             AuthUser authUser,
@@ -63,4 +63,26 @@ public class ScheduleController {
     ) {
         return scheduleService.getSchedulesByDay(authUser, date);
     }
+
+    @GetMapping("/week")
+    public List<ScheduleRes> getSchedulesByWeek(
+            AuthUser authUser,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startOfWeek
+    ) {
+        return scheduleService.getSchedulesByWeek(authUser,
+                                                  startOfWeek == null ? LocalDate.now() :
+                                                          startOfWeek);
+    }
+
+    @GetMapping("/month")
+    public List<ScheduleRes> getSchedulesByDay(
+            AuthUser authUser,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") String yearMonth
+    ) {
+        return scheduleService.getSchedulesByMonth(authUser,
+                                                   yearMonth == null ? YearMonth.now() :
+                                                           YearMonth.parse(yearMonth));
+    }
 }
+
+// TODO docker, mysql, 배치, queryDSL
