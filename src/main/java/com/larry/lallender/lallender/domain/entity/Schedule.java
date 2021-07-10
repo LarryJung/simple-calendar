@@ -16,9 +16,10 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "schedules")
 public class Schedule {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDateTime startAt;
     private LocalDateTime endAt;
@@ -97,10 +98,12 @@ public class Schedule {
     }
 
     public boolean isOverlapped(LocalDate date) {
-        return Period.of(this.startAt, this.endAt).isOverlapped(date);
+        return Period.of(this.startAt, this.endAt)
+                     .isOverlapped(date);
     }
 
     public boolean isOverlapped(Period period) {
-        return Period.of(this.startAt, this.endAt).isOverlapped(period);
+        return Period.of(this.startAt, this.endAt)
+                     .isOverlapped(period);
     }
 }
