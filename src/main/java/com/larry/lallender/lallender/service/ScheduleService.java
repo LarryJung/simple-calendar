@@ -11,11 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.larry.lallender.lallender.exception.ErrorCode.EVENT_CREATE_OVERLAPPED_PERIOD;
@@ -65,10 +63,8 @@ public class ScheduleService {
                                         .collect(toList());
         final List<EngagementRes> engagements = attendees
                 .stream()
-                .map(a -> engagementRepository.save(
-                        Engagement.of(event, a))
-                                              .toRes()
-                )
+                .map(a -> engagementRepository.save(Engagement.of(event, a))
+                                              .toRes())
                 .peek(e -> emailService.send(
                         new EngagementEmailStuff(e.getId(),
                                                  e.getAttendee()

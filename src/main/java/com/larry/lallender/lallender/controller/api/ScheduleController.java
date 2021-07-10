@@ -54,8 +54,6 @@ public class ScheduleController {
         return scheduleService.getSchedules(authUser);
     }
 
-    // 조회 Api 에는 null 체크가 들어가야 한다.
-
     @GetMapping("/day")
     public List<ScheduleRes> getSchedulesByDay(
             AuthUser authUser,
@@ -85,4 +83,4 @@ public class ScheduleController {
     }
 }
 
-// TODO docker, mysql, 배치, queryDSL
+// TODO 배치, queryDSL, event publish
