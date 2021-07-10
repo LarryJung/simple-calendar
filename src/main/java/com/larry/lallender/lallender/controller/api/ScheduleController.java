@@ -1,9 +1,10 @@
 package com.larry.lallender.lallender.controller.api;
 
-import com.larry.lallender.lallender.domain.entity.EngagementStatus;
+import com.larry.lallender.lallender.domain.entity.RequestStatus;
 import com.larry.lallender.lallender.dto.*;
 import com.larry.lallender.lallender.service.EngagementService;
 import com.larry.lallender.lallender.service.ScheduleService;
+import com.larry.lallender.lallender.service.ShareService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +13,13 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api/schedules")
 @RestController
 @RequiredArgsConstructor
 public class ScheduleController {
+    private final ShareService shareService;
     private final ScheduleService scheduleService;
     private final EngagementService engagementService;
 
@@ -41,15 +44,15 @@ public class ScheduleController {
     }
 
     @GetMapping("/events/engagements/{engagementId}")
-    public EngagementStatus updateEngagement(
+    public RequestStatus updateEngagement(
             @PathVariable Long engagementId,
-            @RequestParam EngagementReplyType type,
+            @RequestParam RequestReplyType type,
             AuthUser authUser) {
         return engagementService.update(authUser, engagementId, type);
     }
 
     @GetMapping
-    public List<ScheduleRes> getSchedules(
+    public Map<Long, List<ScheduleRes>> getSchedules(
             AuthUser authUser) {
         return scheduleService.getSchedules(authUser);
     }
@@ -80,6 +83,25 @@ public class ScheduleController {
         return scheduleService.getSchedulesByMonth(authUser,
                                                    yearMonth == null ? YearMonth.now() :
                                                            YearMonth.parse(yearMonth));
+    }
+
+    @PostMapping("/share")
+    public void shareSchedule(
+            AuthUser authUser,
+            @Valid @RequestBody ShareCreateReq shareCreateReq
+    ) {
+        shareService.createShare(authUser.getId(),
+                                 shareCreateReq.getToUserId(),
+                                 shareCreateReq.getDirection());
+    }
+
+    @PostMapping("/share/{shareId}")
+    public void replyToShareRequest(
+            @PathVariable Long shareId,
+            @RequestParam RequestReplyType type,
+            AuthUser authUser
+    ) {
+        shareService.replyToShareRequest(shareId, authUser.getId(), type);
     }
 }
 

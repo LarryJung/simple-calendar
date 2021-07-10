@@ -1,5 +1,5 @@
 package com.larry.lallender.lallender.dto;
 
-public enum EngagementReplyType {
+public enum RequestReplyType {
     ACCEPT, REJECT
 }

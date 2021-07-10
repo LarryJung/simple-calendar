@@ -28,19 +28,19 @@ public class Engagement {
 
     @Getter
     @Enumerated(EnumType.STRING)
-    private EngagementStatus status;
+    private RequestStatus status;
 
     public Event getEvent() {
         return schedule.toEvent();
     }
 
     public Engagement accept() {
-        this.status = EngagementStatus.ACCEPTED;
+        this.status = RequestStatus.ACCEPTED;
         return this;
     }
 
     public Engagement reject() {
-        this.status = EngagementStatus.REJECTED;
+        this.status = RequestStatus.REJECTED;
         return this;
     }
 
@@ -48,7 +48,7 @@ public class Engagement {
         return Engagement.builder()
                          .schedule(event.getSchedule())
                          .attendee(attendee)
-                         .status(EngagementStatus.REQUESTED)
+                         .status(RequestStatus.REQUESTED)
                          .build();
     }
 

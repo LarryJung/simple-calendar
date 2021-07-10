@@ -1,6 +1,5 @@
 package com.larry.lallender.lallender.domain.entity;
 
-public enum EngagementStatus {
+public enum RequestStatus {
     REQUESTED, ACCEPTED, REJECTED
-
 }

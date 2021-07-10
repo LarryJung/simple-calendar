@@ -1,9 +1,9 @@
 package com.larry.lallender.lallender.service;
 
-import com.larry.lallender.lallender.domain.entity.EngagementStatus;
+import com.larry.lallender.lallender.domain.entity.RequestStatus;
 import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.dto.AuthUser;
-import com.larry.lallender.lallender.dto.EngagementReplyType;
+import com.larry.lallender.lallender.dto.RequestReplyType;
 import com.larry.lallender.lallender.exception.CalendarException;
 import com.larry.lallender.lallender.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +16,9 @@ public class EngagementService {
     private final EngagementRepository engagementRepository;
 
     @Transactional
-    public EngagementStatus update(AuthUser authUser,
-                                   Long engagementId,
-                                   EngagementReplyType type) {
+    public RequestStatus update(AuthUser authUser,
+                                Long engagementId,
+                                RequestReplyType type) {
         return engagementRepository.findById(engagementId)
                                    .map(engagement -> {
                                        if (!engagement.getAttendee()
