@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class EngagementEmailStuff {
-    private static final String engagementUpdateApi = "http://localhost:8080/api/schedules/events" +
-            "/engagements/";
+    private static final String engagementUpdateApi = "http://localhost:8080/events/engagements/";
     private final Long engagementId;
     private final String toEmail;
     private final List<String> attendeeEmails;

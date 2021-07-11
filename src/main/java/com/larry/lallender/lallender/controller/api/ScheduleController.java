@@ -42,12 +42,11 @@ public class ScheduleController {
         return scheduleService.createEvent(authUser, eventCreateReq);
     }
 
-    @GetMapping("/events/engagements/{engagementId}")
+    @PostMapping("/events/engagements")
     public RequestStatus updateEngagement(
-            @PathVariable Long engagementId,
-            @RequestParam RequestReplyType type,
+            @Valid @RequestBody ReplyEngagementReq replyEngagementReq,
             AuthUser authUser) {
-        return engagementService.update(authUser, engagementId, type);
+        return engagementService.update(authUser, replyEngagementReq);
     }
 
     @GetMapping("/day")

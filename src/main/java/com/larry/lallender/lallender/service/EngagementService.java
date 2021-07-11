@@ -3,7 +3,7 @@ package com.larry.lallender.lallender.service;
 import com.larry.lallender.lallender.domain.entity.RequestStatus;
 import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.dto.AuthUser;
-import com.larry.lallender.lallender.dto.RequestReplyType;
+import com.larry.lallender.lallender.dto.ReplyEngagementReq;
 import com.larry.lallender.lallender.exception.CalendarException;
 import com.larry.lallender.lallender.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -17,16 +17,15 @@ public class EngagementService {
 
     @Transactional
     public RequestStatus update(AuthUser authUser,
-                                Long engagementId,
-                                RequestReplyType type) {
-        return engagementRepository.findById(engagementId)
+                                ReplyEngagementReq replyEngagementReq) {
+        return engagementRepository.findById(replyEngagementReq.getEngagementId())
                                    .map(engagement -> {
                                        if (!engagement.getAttendee()
                                                       .getId()
                                                       .equals(authUser.getId())) {
                                            return null;
                                        }
-                                       switch (type) {
+                                       switch (replyEngagementReq.getType()) {
                                            case ACCEPT:
                                                return engagement.accept();
                                            case REJECT:
