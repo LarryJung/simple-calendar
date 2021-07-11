@@ -133,17 +133,18 @@ public class ScheduleService {
                                                                      .getName(),
                                                           userId.equals(authUser.getId()),
                                                           Stream.concat(
-                                                                  scheduleRepository.findAllByWriter_Id(
-                                                                          userId)
-                                                                                    .stream()
-                                                                                    .filter(scheduleFilter::apply)
-                                                                                    .map(Schedule::toRes),
-                                                                  engagementRepository.findAllByAttendeeId(
-                                                                          authUser.getId())
-                                                                                      .stream()
-                                                                                      .filter(engagementFilter::apply)
-                                                                                      .map(engagement -> engagement.getEvent()
-                                                                                                                   .toRes())
+                                                                  scheduleRepository
+                                                                          .findAllByWriter_Id(userId)
+                                                                          .stream()
+                                                                          .filter(scheduleFilter::apply)
+                                                                          .map(Schedule::toRes),
+                                                                  engagementRepository
+                                                                          .findAllByAttendeeId(
+                                                                                  userId)
+                                                                          .stream()
+                                                                          .filter(engagementFilter::apply)
+                                                                          .map(engagement -> engagement.getEvent()
+                                                                                                       .toRes())
                                                           )
                                                                 .collect(toList())))
                      .collect(toList());

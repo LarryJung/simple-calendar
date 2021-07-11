@@ -20,6 +20,9 @@ public class EngagementService {
                                 ReplyEngagementReq replyEngagementReq) {
         return engagementRepository.findById(replyEngagementReq.getEngagementId())
                                    .map(engagement -> {
+                                       if (engagement.isDecided()) {
+                                           throw new CalendarException(ErrorCode.ALREADY_DECIDED_ENGAGEMENT);
+                                       }
                                        if (!engagement.getAttendee()
                                                       .getId()
                                                       .equals(authUser.getId())) {

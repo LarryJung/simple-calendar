@@ -87,7 +87,7 @@
 <script th:inline="javascript" type="text/javascript">
     //<![CDATA[
     const isSignIn = [[${isSignIn}]];
-
+    const redirect = [[${redirect}]];
     const signUpBtn = document.getElementById("signUpBtn");
     const signInBtn = document.getElementById("signInBtn");
     const signOutBtn = document.getElementById("signOutBtn");
@@ -96,6 +96,9 @@
 
     if (isSignIn) {
         signOutBtn.style.display = 'inline-block'
+        if (!!redirect) {
+            window.location.href = redirect;
+        }
     } else {
         signUpBtn.style.display = 'inline-block'
         signInBtn.style.display = 'inline-block'

@@ -5,7 +5,6 @@
     <title>Title</title>
 </head>
 <body>
-<div id="resultMessage"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
         integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -14,18 +13,20 @@
     const isSignIn = [[${isSignIn}]];
     const updateType = [[${updateType}]];
     const engagementId = [[${engagementId}]];
+    const path = [[${path}]];
 
     if (!isSignIn) {
-        window.location.href = "/"
+        window.location.href = `/?redirect=${encodeURIComponent(path)}`
     } else {
-        axios.post("/api/events/engagement", {
+        axios.post("/api/schedules/events/engagements", {
             engagementId: engagementId,
             type: updateType
         }).then((res) => {
             console.log(res)
-            document.getElementById("resultMessage").innerText = res
+            alert(JSON.stringify(res.data))
         }).catch((e) => {
             alert(e.response.data.errorMessage)
+            window.location.href = "/";
         })
     }
     //]]>

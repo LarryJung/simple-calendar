@@ -32,9 +32,11 @@ public class IndexController {
     }
 
     @GetMapping("/")
-    public String index(Model model, HttpSession httpSession) {
+    public String index(Model model, HttpSession httpSession,
+                        @RequestParam(required = false) String redirect) {
         model.addAttribute("isSignIn",
                            httpSession.getAttribute(LOGIN_SESSION_KEY) != null);
+        model.addAttribute("redirect", redirect);
         return "index";
     }
 
@@ -47,6 +49,7 @@ public class IndexController {
                            httpSession.getAttribute(LOGIN_SESSION_KEY) != null);
         model.addAttribute("updateType", type.name());
         model.addAttribute("engagementId", engagementId);
+        model.addAttribute("path", "/events/engagements/" + engagementId + "?type=" + type.name());
         return "update-event";
     }
 

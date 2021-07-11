@@ -61,7 +61,7 @@ public class ShareService {
                                             .stream()
                                             .map(Share::getToUserId),
                              shareRepository.findAllByToUserIdAndAndDirectionAndStatus(authUser.getId(),
-                                                                                       Share.Direction.UNI_DIRECTION,
+                                                                                       Share.Direction.BI_DIRECTION,
                                                                                        RequestStatus.ACCEPTED)
                                             .stream()
                                             .map(Share::getFromUserId))

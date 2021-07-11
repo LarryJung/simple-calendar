@@ -1,5 +1,6 @@
 package com.larry.lallender.lallender.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.larry.lallender.lallender.domain.entity.ScheduleType;
 import com.larry.lallender.lallender.util.Period;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class EventRes implements ScheduleRes{
         return ScheduleType.EVENT;
     }
 
+    @JsonIgnore
     public Period getPeriod() {
         return Period.of(startAt, endAt);
     }

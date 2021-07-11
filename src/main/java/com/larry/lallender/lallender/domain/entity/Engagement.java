@@ -34,6 +34,9 @@ public class Engagement {
         return schedule.toEvent();
     }
 
+    public boolean isDecided() {
+        return this.status != RequestStatus.REQUESTED;
+    }
     public Engagement accept() {
         this.status = RequestStatus.ACCEPTED;
         return this;
