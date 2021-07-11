@@ -1,5 +1,6 @@
 package com.larry.lallender.lallender.service;
 
+import com.larry.lallender.lallender.domain.entity.Engagement;
 import com.larry.lallender.lallender.domain.entity.RequestStatus;
 import com.larry.lallender.lallender.domain.repository.EngagementRepository;
 import com.larry.lallender.lallender.dto.AuthUser;
@@ -19,10 +20,8 @@ public class EngagementService {
     public RequestStatus update(AuthUser authUser,
                                 ReplyEngagementReq replyEngagementReq) {
         return engagementRepository.findById(replyEngagementReq.getEngagementId())
+                                   .filter(Engagement::isRequested)
                                    .map(engagement -> {
-                                       if (engagement.isDecided()) {
-                                           throw new CalendarException(ErrorCode.ALREADY_DECIDED_ENGAGEMENT);
-                                       }
                                        if (!engagement.getAttendee()
                                                       .getId()
                                                       .equals(authUser.getId())) {
