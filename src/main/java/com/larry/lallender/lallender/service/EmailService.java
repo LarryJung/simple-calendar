@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -17,8 +18,9 @@ public class EmailService {
     private final SpringTemplateEngine templateEngine;
     private final JavaMailSender emailSender;
 
+    @Async
     public void send(EngagementEmailStuff stuff) {
-        MimeMessagePreparator preparator = message -> {
+        final MimeMessagePreparator preparator = message -> {
             MimeMessageHelper helper = new MimeMessageHelper(message);
             helper.setFrom("noreply@baeldung.com");
             helper.setTo(stuff.getToEmail());
