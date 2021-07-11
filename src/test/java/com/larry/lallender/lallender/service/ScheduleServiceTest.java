@@ -32,11 +32,13 @@ public class ScheduleServiceTest {
             Mockito.mock(EngagementRepository.class);
     private final UserService userService = Mockito.mock(UserService.class);
     private final EmailService emailService = Mockito.mock(EmailService.class);
+    private final ShareService shareService = Mockito.mock(ShareService.class);
     private final ScheduleService scheduleService = new ScheduleService(
             emailService,
             scheduleRepository,
             engagementRepository,
-            userService);
+            userService,
+            shareService);
 
     @Test
     @DisplayName("할일을 생성한다.")
@@ -44,10 +46,10 @@ public class ScheduleServiceTest {
         final User writer = user1;
         final TaskCreateReq req = new TaskCreateReq("방청소", null, time1);
         when(userService.findById(1L)).thenReturn(user1);
-        when(scheduleRepository.save(any())).thenReturn(Schedule.ofTask(req.getTitle(),
-                                                                        req.getDescription(),
-                                                                        req.getTaskAt(),
-                                                                        writer));
+        when(scheduleRepository.save(any())).thenReturn(Schedule.task(req.getTitle(),
+                                                                      req.getDescription(),
+                                                                      req.getTaskAt(),
+                                                                      writer));
         final TaskRes task = scheduleService.createTask(authUser1, req);
         assertEquals("방청소", task.getTitle());
         assertEquals(1L,
@@ -93,20 +95,20 @@ public class ScheduleServiceTest {
         final User writer = user1;
         when(engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtAfter(any(), any()))
                 .thenReturn(List.of(
-                        Engagement.of(Schedule.ofEvent(time1,
-                                                       time2,
-                                                       null,
-                                                       null,
-                                                       null)
+                        Engagement.of(Schedule.event(time1,
+                                                     time2,
+                                                     null,
+                                                     null,
+                                                     null)
                                               .toEvent(),
                                       User.builder()
                                           .id(2L)
                                           .build()),
-                        Engagement.of(Schedule.ofEvent(time2.plusMinutes(5),
-                                                       time2.plusMinutes(10),
-                                                       null,
-                                                       null,
-                                                       null)
+                        Engagement.of(Schedule.event(time2.plusMinutes(5),
+                                                     time2.plusMinutes(10),
+                                                     null,
+                                                     null,
+                                                     null)
                                               .toEvent(),
                                       User.builder()
                                           .id(3L)
@@ -144,21 +146,21 @@ public class ScheduleServiceTest {
     void test4() {
         when(engagementRepository.findAllByAttendeeIdInAndSchedule_EndAtAfter(any(), any()))
                 .thenReturn(List.of(
-                        Engagement.of(Schedule.ofEvent(time1,
-                                                       time2,
-                                                       null,
-                                                       null,
-                                                       null)
+                        Engagement.of(Schedule.event(time1,
+                                                     time2,
+                                                     null,
+                                                     null,
+                                                     null)
                                               .toEvent(),
                                       User.builder()
                                           .id(2L)
                                           .build())
                                   .accept(),
-                        Engagement.of(Schedule.ofEvent(time2.plusMinutes(5),
-                                                       time2.plusMinutes(10),
-                                                       null,
-                                                       null,
-                                                       null)
+                        Engagement.of(Schedule.event(time2.plusMinutes(5),
+                                                     time2.plusMinutes(10),
+                                                     null,
+                                                     null,
+                                                     null)
                                               .toEvent(),
                                       User.builder()
                                           .id(3L)

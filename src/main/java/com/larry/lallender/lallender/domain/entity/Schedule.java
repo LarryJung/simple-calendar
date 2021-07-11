@@ -34,8 +34,8 @@ public class Schedule {
     private ScheduleType scheduleType;
     private LocalDateTime createdAt;
 
-    public static Schedule ofEvent(LocalDateTime startAt, LocalDateTime endAt, String title,
-                                   String description, User writer) {
+    public static Schedule event(LocalDateTime startAt, LocalDateTime endAt, String title,
+                                 String description, User writer) {
         return Schedule.builder()
                        .startAt(startAt)
                        .endAt(endAt)
@@ -47,8 +47,8 @@ public class Schedule {
                        .build();
     }
 
-    public static Schedule ofTask(String title, String description, LocalDateTime taskAt,
-                                  User writer) {
+    public static Schedule task(String title, String description, LocalDateTime taskAt,
+                                User writer) {
         return Schedule.builder()
                        .startAt(taskAt)
                        .title(title)
@@ -59,7 +59,7 @@ public class Schedule {
                        .build();
     }
 
-    public static Schedule ofNotification(LocalDateTime notifyAt, String title, User writer) {
+    public static Schedule notification(LocalDateTime notifyAt, String title, User writer) {
         return Schedule.builder()
                        .startAt(notifyAt)
                        .title(title)

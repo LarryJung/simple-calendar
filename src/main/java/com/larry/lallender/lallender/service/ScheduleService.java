@@ -13,15 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.larry.lallender.lallender.exception.ErrorCode.EVENT_CREATE_OVERLAPPED_PERIOD;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 @Service
 @RequiredArgsConstructor
@@ -35,10 +32,10 @@ public class ScheduleService {
     @Transactional
     public TaskRes createTask(AuthUser authUser, TaskCreateReq req) {
         final User writer = userService.findById(authUser.getId());
-        final Schedule schedule = scheduleRepository.save(Schedule.ofTask(req.getTitle(),
-                                                                          req.getDescription(),
-                                                                          req.getTaskAt(),
-                                                                          writer));
+        final Schedule schedule = scheduleRepository.save(Schedule.task(req.getTitle(),
+                                                                        req.getDescription(),
+                                                                        req.getTaskAt(),
+                                                                        writer));
         return schedule.toTask()
                        .toRes();
     }
@@ -56,11 +53,11 @@ public class ScheduleService {
                         && e.getStatus() == RequestStatus.ACCEPTED)) {
             throw new CalendarException(EVENT_CREATE_OVERLAPPED_PERIOD);
         }
-        final Event event = scheduleRepository.save(Schedule.ofEvent(req.getStartAt(),
-                                                                     req.getEndAt(),
-                                                                     req.getTitle(),
-                                                                     req.getDescription(),
-                                                                     writer))
+        final Event event = scheduleRepository.save(Schedule.event(req.getStartAt(),
+                                                                   req.getEndAt(),
+                                                                   req.getTitle(),
+                                                                   req.getDescription(),
+                                                                   writer))
                                               .toEvent();
         final List<User> attendees = req.getAttendeeIds()
                                         .stream()
@@ -92,65 +89,63 @@ public class ScheduleService {
         final User writer = userService.findById(authUser.getId());
         return req.getFlattenedTimes()
                   .stream()
-                  .map(notifyAt -> scheduleRepository.save(Schedule.ofNotification(notifyAt,
-                                                                                   req.getTitle(),
-                                                                                   writer))
+                  .map(notifyAt -> scheduleRepository.save(Schedule.notification(notifyAt,
+                                                                                 req.getTitle(),
+                                                                                 writer))
                                                      .toNotification()
                                                      .toRes())
                   .collect(toList());
     }
 
     @Transactional
-    public Map<Long, List<ScheduleRes>> getSchedules(AuthUser authUser) {
-        final Set<Long> sharedUserIds = shareService.findSharedUserIdsByUser(authUser);
-        return Stream.concat(sharedUserIds.stream(), Stream.of(authUser.getId()))
-                     .collect(toMap(Function.identity(),
-                                               (userId) -> scheduleRepository.findAllByWriter_Id(
-                                                       authUser.getId())
-                                                                             .stream()
-                                                                             .map(Schedule::toRes)
-                                                                             .collect(toList())
-                     ));
-    }
-
-    @Transactional
-    public List<ScheduleRes> getSchedulesByDay(AuthUser authUser, LocalDate date) {
+    public List<SharedScheduleRes> getSchedulesByDay(AuthUser authUser, LocalDate date) {
         return getSchedulesByFilter(authUser,
                                     (schedule) -> schedule.isOverlapped(date),
-                                    (engagement -> engagement.isOverlapped(date)));
+                                    (engagement) -> engagement.isOverlapped(date));
     }
 
     @Transactional
-    public List<ScheduleRes> getSchedulesByMonth(AuthUser authUser, YearMonth yearMonth) {
+    public List<SharedScheduleRes> getSchedulesByMonth(AuthUser authUser,
+                                                       YearMonth yearMonth) {
         final Period period = Period.of(yearMonth.atDay(1), yearMonth.atEndOfMonth());
         return getSchedulesByFilter(authUser,
                                     (schedule) -> schedule.isOverlapped(period),
-                                    (engagement -> engagement.isOverlapped(period)));
+                                    (engagement) -> engagement.isOverlapped(period));
     }
 
     @Transactional
-    public List<ScheduleRes> getSchedulesByWeek(AuthUser authUser, LocalDate startOfWeek) {
+    public List<SharedScheduleRes> getSchedulesByWeek(AuthUser authUser,
+                                                      LocalDate startOfWeek) {
         final Period period = Period.of(startOfWeek, startOfWeek.plusDays(6));
         return getSchedulesByFilter(authUser,
                                     (schedule) -> schedule.isOverlapped(period),
-                                    (engagement -> engagement.isOverlapped(period)));
+                                    (engagement) -> engagement.isOverlapped(period));
     }
 
-    private List<ScheduleRes> getSchedulesByFilter(AuthUser authUser,
-                                                   Function<Schedule, Boolean> scheduleFilter,
-                                                   Function<Engagement, Boolean> engagementFilter
+    private List<SharedScheduleRes> getSchedulesByFilter(AuthUser authUser,
+                                                         Function<Schedule, Boolean> scheduleFilter,
+                                                         Function<Engagement, Boolean> engagementFilter
     ) {
-        return Stream.concat(
-                scheduleRepository.findAllByWriter_Id(authUser.getId())
-                                  .stream()
-                                  .filter(scheduleFilter::apply)
-                                  .map(Schedule::toRes),
-                engagementRepository.findAllByAttendeeId(authUser.getId())
-                                    .stream()
-                                    .filter(engagementFilter::apply)
-                                    .map(engagement -> engagement.getEvent()
-                                                                 .toRes())
-        )
+        final Set<Long> sharedUserIds = shareService.findSharedUserIdsByUser(authUser);
+        return Stream.concat(sharedUserIds.stream(), Stream.of(authUser.getId()))
+                     .map(userId -> new SharedScheduleRes(userId,
+                                                          userService.findById(userId)
+                                                                     .getName(),
+                                                          userId.equals(authUser.getId()),
+                                                          Stream.concat(
+                                                                  scheduleRepository.findAllByWriter_Id(
+                                                                          userId)
+                                                                                    .stream()
+                                                                                    .filter(scheduleFilter::apply)
+                                                                                    .map(Schedule::toRes),
+                                                                  engagementRepository.findAllByAttendeeId(
+                                                                          authUser.getId())
+                                                                                      .stream()
+                                                                                      .filter(engagementFilter::apply)
+                                                                                      .map(engagement -> engagement.getEvent()
+                                                                                                                   .toRes())
+                                                          )
+                                                                .collect(toList())))
                      .collect(toList());
     }
 }

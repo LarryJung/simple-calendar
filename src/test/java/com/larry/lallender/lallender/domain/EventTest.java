@@ -18,11 +18,11 @@ public class EventTest {
         final LocalDateTime startAt = LocalDateTime.of(2020, 7, 1, 0, 0, 0);
         final LocalDateTime endAt = LocalDateTime.of(2020, 7, 1, 0, 0, 10);
 
-        final Event event = Schedule.ofEvent(startAt,
-                                             endAt,
-                                             "title",
-                                             "desc",
-                                             User.builder()
+        final Event event = Schedule.event(startAt,
+                                           endAt,
+                                           "title",
+                                           "desc",
+                                           User.builder()
                                                  .build())
                                     .toEvent();
 

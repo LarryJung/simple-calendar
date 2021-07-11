@@ -13,7 +13,6 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Map;
 
 @RequestMapping("/api/schedules")
 @RestController
@@ -51,14 +50,8 @@ public class ScheduleController {
         return engagementService.update(authUser, engagementId, type);
     }
 
-    @GetMapping
-    public Map<Long, List<ScheduleRes>> getSchedules(
-            AuthUser authUser) {
-        return scheduleService.getSchedules(authUser);
-    }
-
     @GetMapping("/day")
-    public List<ScheduleRes> getSchedulesByDay(
+    public List<SharedScheduleRes> getSchedulesByDay(
             AuthUser authUser,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
@@ -66,7 +59,7 @@ public class ScheduleController {
     }
 
     @GetMapping("/week")
-    public List<ScheduleRes> getSchedulesByWeek(
+    public List<SharedScheduleRes> getSchedulesByWeek(
             AuthUser authUser,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startOfWeek
     ) {
@@ -76,7 +69,7 @@ public class ScheduleController {
     }
 
     @GetMapping("/month")
-    public List<ScheduleRes> getSchedulesByDay(
+    public List<SharedScheduleRes> getSchedulesByDay(
             AuthUser authUser,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM") String yearMonth
     ) {
@@ -85,7 +78,7 @@ public class ScheduleController {
                                                            YearMonth.parse(yearMonth));
     }
 
-    @PostMapping("/share")
+    @PostMapping("/shares")
     public void shareSchedule(
             AuthUser authUser,
             @Valid @RequestBody ShareCreateReq shareCreateReq
@@ -95,7 +88,7 @@ public class ScheduleController {
                                  shareCreateReq.getDirection());
     }
 
-    @PostMapping("/share/{shareId}")
+    @PostMapping("/shares/{shareId}")
     public void replyToShareRequest(
             @PathVariable Long shareId,
             @RequestParam RequestReplyType type,
@@ -104,5 +97,3 @@ public class ScheduleController {
         shareService.replyToShareRequest(shareId, authUser.getId(), type);
     }
 }
-
-// TODO 배치, queryDSL, event publish
